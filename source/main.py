@@ -6,3 +6,4 @@ main = Blueprint('main', __name__)
 @main.route('/dash')
 def dash():
     return render_template('dash.html')
+
