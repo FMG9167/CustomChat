@@ -1,42 +1,27 @@
-import socket, multiprocessing, time
- 
+import socket
+from _thread import *
+
 host = '127.0.0.1'
-portA = 5000
+portMain = 6000
 
-A = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
-A.bind((host,portA))
+sock = socket.socket()
 
-A.listen(1)
+sock.bind((host,portMain))
 
-conn, _ = A.accept()
+print("Starting to listen")
 
-# def receive(s):
-#     msg=s.recv(2048).decode()
-#     while msg!="bye":
-#         print(msg)
-#         msg = s.recv(2048).decode()
+sock.listen(5)
 
-def send(s):
-    a='Connected'
-    while a:
-        s.send(a.encode())
-        a=input()
-    s.send("bye".encode())
+def onNewClient(conn):
+    msg="a"
+    while msg:
+        msg = conn.recv(1024).decode()
+        conn.send(msg[::-1].encode())
+    conn.close()
+i=10
 
-def test():
-    for i in range(0,10):
-        print(i)
-        time.sleep(2)
-
-p1 = multiprocessing.Process(target=send, args=(conn,))
-# p2 = multiprocessing.Process(target=receive, args=(conn,))
-p3 = multiprocessing.Process(target=test)
-
-p1.start()
-# p2.start()
-p3.start()
-
-p1.join()
-# p2.join()
-p3.join()
+while True:
+    conn, addr = sock.accept()
+    start_new_thread(onNewClient, (conn,))
+    print("connected to " + str(addr))
